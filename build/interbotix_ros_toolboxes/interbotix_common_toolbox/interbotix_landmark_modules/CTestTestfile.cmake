@@ -1,0 +1,8 @@
+# CMake generated Testfile for 
+# Source directory: /my_project/src/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules
+# Build directory: /my_project/build/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+add_test(_ctest_interbotix_landmark_modules_rostest_test_test-landmark.test "/my_project/build/catkin_generated/env_cached.sh" "/usr/bin/python3" "/opt/ros/noetic/share/catkin/cmake/test/run_tests.py" "/my_project/build/test_results/interbotix_landmark_modules/rostest-test_test-landmark.xml" "--return-code" "/usr/bin/python3 /opt/ros/noetic/share/rostest/cmake/../../../bin/rostest --pkgdir=/my_project/src/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules --package=interbotix_landmark_modules --results-filename test_test-landmark.xml --results-base-dir \"/my_project/build/test_results\" /my_project/src/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules/test/test-landmark.test ")
+set_tests_properties(_ctest_interbotix_landmark_modules_rostest_test_test-landmark.test PROPERTIES  _BACKTRACE_TRIPLES "/opt/ros/noetic/share/catkin/cmake/test/tests.cmake;160;add_test;/opt/ros/noetic/share/rostest/cmake/rostest-extras.cmake;52;catkin_run_tests_target;/my_project/src/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules/CMakeLists.txt;86;add_rostest;/my_project/src/interbotix_ros_toolboxes/interbotix_common_toolbox/interbotix_landmark_modules/CMakeLists.txt;0;")

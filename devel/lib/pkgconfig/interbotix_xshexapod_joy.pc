@@ -1,0 +1,8 @@
+prefix=/my_project/devel
+
+Name: interbotix_xshexapod_joy
+Description: Description of interbotix_xshexapod_joy
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: interbotix_xshexapod_control interbotix_xs_msgs joy roscpp rospy sensor_msgs std_msgs urdfdom_py
