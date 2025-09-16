@@ -5,3 +5,4 @@ devel/
 # Ignoriere alles im src-Ordner außer behavior_tree
 src/*
 !src/behavior_tree/
+!src/realsense-ros

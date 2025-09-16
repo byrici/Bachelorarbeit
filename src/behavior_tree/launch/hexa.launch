@@ -1,0 +1,82 @@
+<launch>
+  <arg name="robot_model"                default="pxmark4"/>
+  <arg name="robot_name"                 default="$(arg robot_model)"/>
+  <arg name="external_urdf_loc"          default=""/>
+  <arg name="use_rviz"                   default="false"/>
+  <arg name="rviz_frame"                 default="$(arg robot_name)/base_bottom_link"/>
+  <arg name="use_pixels"                 default="false"/>
+  <arg name="load_configs"               default="true"/>
+  <arg name="motor_configs"              default="$(find interbotix_xshexapod_control)/config/$(arg robot_model).yaml"/>
+  <arg name="mode_configs"               default="$(find interbotix_xshexapod_control)/config/modes.yaml"/>
+  
+  <!-- Hier direkt xs_sdk (kein Sim mehr) -->
+  <arg name="xs_sdk_type" value="xs_sdk"/>
+
+  <!-- Roboterbeschreibung laden -->
+  <include file="$(find interbotix_xshexapod_descriptions)/launch/xshexapod_description.launch">
+    <arg name="robot_model"         value="$(arg robot_model)"/>
+    <arg name="robot_name"          value="$(arg robot_name)"/>
+    <arg name="external_urdf_loc"   value="$(arg external_urdf_loc)"/>
+    <arg name="use_rviz"            value="$(arg use_rviz)"/>
+    <arg name="rviz_frame"          value="$(arg rviz_frame)"/>
+    <arg name="load_gazebo_configs" value="false"/>
+  </include>
+
+  <node if="$(arg use_pixels)"
+        name="rpi_pixels"
+        pkg="interbotix_rpi_modules"
+        type="rpi_pixels"
+        output="screen"
+        ns="$(arg robot_name)"
+        launch-prefix="sudo -S -E PYTHONPATH=$(env PYTHONPATH)">
+    <param name="gpio_pin"    value="18"/>
+    <param name="num_pixels"  value="2"/>
+  </node>
+
+  <!-- Motorsteuerung -->
+  <node
+    name="xs_sdk"
+    pkg="interbotix_xs_sdk"
+    type="$(arg xs_sdk_type)"
+    output="screen"
+    ns="$(arg robot_name)">
+    <param name="motor_configs" value="$(arg motor_configs)"/>
+    <param name="mode_configs"  value="$(arg mode_configs)"/>
+    <param name="load_configs"  value="$(arg load_configs)"/>
+  </node>
+
+  <!-- Behavior Tree Nodes -->
+  <node name="joint_state_to_gazebo_bridge"
+        pkg="behavior_tree"
+        type="control_mapping.py"
+        output="screen"/>
+
+  <node name="bt_hexapod_controller"
+        pkg="behavior_tree"
+        type="tree.py"
+        output="screen"
+        required="true"/>
+
+  <node pkg="behavior_tree" 
+        type="obstacle_check.py" 
+        name="obstacle_check_node" 
+        output="screen" />
+
+  <node name="extract_position_node"
+        pkg="behavior_tree"
+        type="extract_position.py"
+        output="screen" />
+
+  <node name="spawn_obstacle_node"
+        pkg="behavior_tree"
+        type="spawn_obstacle.py"
+        output="screen" />
+
+  <!-- Realsense Kamera starten -->
+  <include file="/my_project/src/realsense-ros/realsense2_camera/launch/rs_camera.launch">
+    <arg name="camera" value="camera"/>
+    <arg name="enable_depth" value="true"/>
+    <arg name="enable_color" value="true"/>
+  </include>
+
+</launch>
