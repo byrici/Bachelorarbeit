@@ -73,7 +73,7 @@
         output="screen" />
 
   <!-- Realsense Kamera starten -->
-  <include file="/my_project/src/realsense-ros/realsense2_camera/launch/rs_camera.launch">
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="camera" value="camera"/>
     <arg name="enable_depth" value="true"/>
     <arg name="enable_color" value="true"/>
