@@ -46,11 +46,6 @@
   </node>
 
   <!-- Behavior Tree Nodes -->
-  <node name="joint_state_to_gazebo_bridge"
-        pkg="behavior_tree"
-        type="control_mapping.py"
-        output="screen"/>
-
   <node name="bt_hexapod_controller"
         pkg="behavior_tree"
         type="tree.py"
@@ -65,11 +60,6 @@
   <node name="extract_position_node"
         pkg="behavior_tree"
         type="extract_position.py"
-        output="screen" />
-
-  <node name="spawn_obstacle_node"
-        pkg="behavior_tree"
-        type="spawn_obstacle.py"
         output="screen" />
 
   <!-- Realsense Kamera starten -->
