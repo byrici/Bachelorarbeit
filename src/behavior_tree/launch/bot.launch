@@ -9,7 +9,7 @@
   <arg name="load_configs"               default="true"/>
   <arg name="motor_configs"              default="$(find interbotix_xshexapod_control)/config/$(arg robot_model).yaml"/>
   <arg name="mode_configs"               default="$(find interbotix_xshexapod_control)/config/modes.yaml"/>
-  <arg name="world_name"                 default="$(find interbotix_xshexapod_gazebo)/worlds/one_hill.world"/>
+  <arg name="world_name"                 default="$(find interbotix_xshexapod_gazebo)/worlds/empty_world.world"/>
   <arg name="gui"                        default="true"/>
   <arg name="debug"                      default="false"/>
   <arg name="paused"                     default="true"/>
@@ -117,6 +117,16 @@
   <node pkg="behavior_tree" 
         type="obstacle_check.py" 
         name="obstacle_check_node" 
+        output="screen" />
+
+  <node name="extract_position_node"
+        pkg="behavior_tree"
+        type="extract_position.py"
+        output="screen" />
+
+  <node name="spawn_obstacle_node"
+        pkg="behavior_tree"
+        type="spawn_obstacle.py"
         output="screen" />
  
 

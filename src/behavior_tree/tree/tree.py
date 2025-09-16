@@ -37,13 +37,11 @@ class WalkForwardTripodBehavior(py_trees.behaviour.Behaviour):
         self.done = False
 
     def update(self):
-        if not self.done:
-            rospy.loginfo(f"Calling move_forward() in {self.name}")
-            self.hexapod.move_forward()
-            self.done = True
-            return py_trees.common.Status.SUCCESS
-        else:
-            return py_trees.common.Status.SUCCESS
+        rospy.loginfo(f"Calling move_forward() in {self.name}")
+        self.hexapod.move_forward()
+            
+        return py_trees.common.Status.SUCCESS
+        
 
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
@@ -63,13 +61,10 @@ class WalkForwardWaveBehavior(py_trees.behaviour.Behaviour):
         self.done = False
 
     def update(self):
-        if not self.done:
-            rospy.loginfo(f"Calling move_forward() in {self.name}")
-            self.hexapod.move_forward(gait_type='wave')
-            self.done = True
-            return py_trees.common.Status.SUCCESS
-        else:
-            return py_trees.common.Status.SUCCESS
+        rospy.loginfo(f"Calling move_forward() in {self.name}")
+        self.hexapod.move_forward(gait_type='wave')
+            
+        return py_trees.common.Status.SUCCESS
 
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
@@ -90,13 +85,9 @@ class WalkBackwardsTripodBehavior(py_trees.behaviour.Behaviour):
         self.done = False
 
     def update(self):
-        if not self.done:
-            rospy.loginfo(f"Calling move_forward() in {self.name} with negative x stride")
-            self.hexapod.move_forward(gait_type='Tripod', x_stride=-0.06)
-            self.done = True
-            return py_trees.common.Status.SUCCESS
-        else:
-            return py_trees.common.Status.SUCCESS
+        rospy.loginfo(f"Calling move_forward() in {self.name} with negative x stride")
+        self.hexapod.move_forward(gait_type='Tripod', x_stride=-0.06)
+        return py_trees.common.Status.SUCCESS
 
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
@@ -116,13 +107,10 @@ class RotateBehaviour(py_trees.behaviour.Behaviour):
         self.done = False
 
     def update(self):
-        if not self.done:
-            rospy.loginfo(f"Calling move_in_place() in {self.name}")
-            self.hexapod.rotate(yaw_stride = 0.1)
-            self.done = True
-            return py_trees.common.Status.SUCCESS
-        else:
-            return py_trees.common.Status.SUCCESS
+        rospy.loginfo(f"Calling move_in_place() in {self.name}")
+        self.hexapod.rotate(yaw_stride = 0.1)
+            
+        return py_trees.common.Status.RUNNING
 
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
@@ -180,8 +168,8 @@ class AdaptiveGaitSwitcher(py_trees.behaviour.Behaviour):
         super(AdaptiveGaitSwitcher, self).__init__(name)
         self.hexapod = hexapod
         self.done = False
-        self.pich_threshold = 12.0
-        self.roll_threshold = 10.0
+        self.pich_threshold = 1.5
+        self.roll_threshold = 1.5
         self.uneven = False 
         self.msg_received = False
 
@@ -196,14 +184,14 @@ class AdaptiveGaitSwitcher(py_trees.behaviour.Behaviour):
 
     def imu_callback(self, msg):
         roll, pitch, yaw = self.get_rpy(msg)
-        rospy.loginfo(f"IMU Roll: {roll}, Pitch: {pitch}, Yaw: {yaw}")
+        """ rospy.loginfo(f"IMU Roll: {roll}, Pitch: {pitch}, Yaw: {yaw}") """
 
         if abs(pitch) > self.pich_threshold or abs(roll) > self.roll_threshold:
             self.uneven = True
-            rospy.loginfo("Uneven terrain detected, switching to wave gait.")
+            """ rospy.loginfo("Uneven terrain detected, switching to wave gait.") """
         else:
             if self.uneven:
-                rospy.loginfo("Terrain is even again, switching back to tripod gait.")    
+                """ rospy.loginfo("Terrain is even again, switching back to tripod gait.")    """ 
             self.uneven = False
 
         self.msg_received = True
@@ -230,21 +218,12 @@ def create_tree_obstacle_avoidance():
     
     check_obstacle = CheckForObstacleBehaviour()
     
-    # Output muss invertiert werden, damit die Rotation ausgeführt wird, bis kein Hindernis erkannt wird
-    rotate_behaviour = py_trees.decorators.Inverter(
-        child=RotateBehaviour(hexapod=hexapod),
-        name="RotateInverter"
-    )
     
-
-    # Erstelle Walk-Actions
+    rotate_behaviour = RotateBehaviour(hexapod=hexapod)
+   
+    # Erstelle Walk-Action
     repeat_walk_tripod = WalkForwardTripodBehavior(hexapod=hexapod)
-    repeat_walk_wave = WalkForwardWaveBehavior(hexapod=hexapod)
-
-    # Laufsequenz erstellen
-    walk_sequence = py_trees.composites.Sequence("WalkSequence", memory=False)
-    walk_sequence.add_child(repeat_walk_tripod)
-    walk_sequence.add_child(repeat_walk_wave)
+    
 
     # Fallback-Sequenz für Hindernisvermeidung
     obstacle_fallback = py_trees.composites.Selector("ObstacleSequence", memory=False)
@@ -254,7 +233,7 @@ def create_tree_obstacle_avoidance():
     # Erstelle die Wurzel des Baums
     root = py_trees.composites.Sequence("MainSequence", memory=False)
     root.add_child(obstacle_fallback)
-    root.add_child(walk_sequence)
+    root.add_child(repeat_walk_tripod)
     
     
     return root
@@ -285,14 +264,23 @@ def main():
     rospy.init_node("bt_hexapod_controller")
 
     # BT erstellen
-    tree = py_trees.trees.BehaviourTree(create_tree_adaptive_gait_switch())
+    tree = py_trees.trees.BehaviourTree(create_tree_obstacle_avoidance())
 
     rospy.loginfo("Behavior Tree gestartet")
 
-    rate = rospy.Rate(1.0)
     while not rospy.is_shutdown():
-        tree.tick()
-        rate.sleep()
+        tree.tick_tock(
+
+            period_ms=500,
+
+            number_of_iterations=py_trees.trees.CONTINUOUS_TICK_TOCK,
+
+            pre_tick_handler=None,
+
+            post_tick_handler=None,
+
+        )
+        
 
 if __name__ == '__main__':
     main()

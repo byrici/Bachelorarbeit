@@ -33,9 +33,6 @@ def obstacle_check(msg):
         rospy.loginfo("No obstacles detected within stopping distance.")
         return False
 
-""" rospy.init_node("obstacle_check_node", anonymous=True)
-rospy.loginfo("Obstacle check node started.")
-rospy.Subscriber("/camera/depth/image_raw", Image, obstacle_check)
-rospy.spin() """
+
 
     
