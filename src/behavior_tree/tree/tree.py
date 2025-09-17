@@ -146,6 +146,7 @@ class CheckForObstacleBehaviour(py_trees.behaviour.Behaviour):
             else py_trees.common.Status.SUCCESS
         )
 
+
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
 
