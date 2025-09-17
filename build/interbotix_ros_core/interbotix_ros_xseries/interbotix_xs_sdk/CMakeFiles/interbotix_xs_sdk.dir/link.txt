@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O3 -DNDEBUG  -shared -Wl,-soname,libinterbotix_xs_sdk.so -o /my_project/devel/lib/libinterbotix_xs_sdk.so CMakeFiles/interbotix_xs_sdk.dir/src/xs_sdk_obj.cpp.o  -lyaml-cpp 

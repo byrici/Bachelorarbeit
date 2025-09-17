@@ -1,8 +1,0 @@
-prefix=/my_project/install
-
-Name: behavior_tree
-Description: Description of behavior_tree
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
