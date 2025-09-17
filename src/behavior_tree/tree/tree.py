@@ -119,46 +119,32 @@ class CheckForObstacleBehaviour(py_trees.behaviour.Behaviour):
     def __init__(self, name="CheckForObstacle"):
         super(CheckForObstacleBehaviour, self).__init__(name)
         self.obstacle_detected = False
-        self.bridge = CvBridge()
-        self.stop_distance = 0.5  # Distance in meters to stop before an obstacle
         self.msg_received = False
 
     def setup(self, **kwargs):
         rospy.loginfo(f"Setup {self.name}")
+        rospy.Subscriber("/obstacles_detected", Bool, self.check_obstacle)
         return True
 
     def initialise(self):
         rospy.loginfo(f"Initialising {self.name}")
         self.msg_received = False
-        rospy.Subscriber("/camera/depth/image_raw", Image, self.check_obstacle)
-        
-    
-    def check_obstacle(self, msg):
-        depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
-        valid_depth = np.where((depth_image > 0.0) & (depth_image < np.inf), depth_image, np.inf)
-        #Interessanten Bereich des Bildes auswählen
-        h, w = depth_image.shape
-        #Hier wird der mittlere Bereich des Bildes ausgewählt
-        roi = valid_depth[h//3:2*h//3, :]
-
-        #Werte von Millimeter in Meter umrechnen
-        roi_m = roi / 1000.0
-
-        #Kleinsten gültigen Bereich finden
-        min_distance = np.min(roi_m)
-
-        #Abstand prüfen
-        self.obstacle_detected = min_distance < self.stop_distance
+    def check_obstacle(self, msg: Bool):
+        self.obstacle_detected = msg.data
         self.msg_received = True
 
     def update(self):
         if not self.msg_received:
-            print("Waiting for depth image message...")
+            rospy.loginfo("Waiting for obstacle detection message...")
             return py_trees.common.Status.RUNNING
-        print("message received, checking obstacle status...")
-        return py_trees.common.Status.FAILURE if self.obstacle_detected else py_trees.common.Status.SUCCESS
-            
+
+        rospy.loginfo(f"Obstacle detected: {self.obstacle_detected}")
+        return (
+            py_trees.common.Status.FAILURE
+            if self.obstacle_detected
+            else py_trees.common.Status.SUCCESS
+        )
 
     def terminate(self, new_status):
         rospy.loginfo(f"Terminating {self.name}")
