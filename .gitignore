@@ -3,6 +3,5 @@ build/
 devel/
 
 # Ignoriere alles im src-Ordner außer behavior_tree
-src/*
-!src/behavior_tree/
-!src/realsense-ros/
+src/interbotix_*
+src/DynamixelSDK
