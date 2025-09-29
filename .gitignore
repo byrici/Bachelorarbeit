@@ -1,0 +1,8 @@
+# Build-Ordner ignorieren
+build/
+devel/
+
+# Ignoriere alles im src-Ordner außer behavior_tree
+src/interbotix_*
+src/DynamixelSDK
+src/interbotix_ros_core
