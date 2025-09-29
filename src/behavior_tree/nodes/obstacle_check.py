@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+from std_msgs.msg import Bool
 
 bridge = CvBridge()
 
@@ -17,13 +18,13 @@ class ObstacleCheckNode:
 
         self.pub = rospy.Publisher("/obstacles_detected", Bool, queue_size=10)
 
-        rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.obstacle_check)
+        rospy.Subscriber("/camera/depth/image_raw", Image, self.obstacle_check)
 
         rospy.loginfo("Obstacle Check Node started.")
         rospy.spin()
         
 
-    def obstacle_check(msg):
+    def obstacle_check(self, msg):
         depth_image = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
         valid_depth = np.where((depth_image > 0.0) & (depth_image < np.inf), depth_image, np.inf)

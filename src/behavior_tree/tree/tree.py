@@ -12,6 +12,7 @@ from tf.transformations import euler_from_quaternion
 from sensor_msgs.msg import Imu
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
+from std_msgs.msg import Bool
 
 # nodes zum Python-Importpfad hinzufügen
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'nodes'))
@@ -19,7 +20,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'nodes'))
 import walk_forward  # importiere die Funktion aus walk_forward.py
 import switch_gait 
 from walk_forward import HexapodWrapper # importiere die Funktion aus switch_gait.py
-from obstacle_check import obstacle_check
+
 
 
 class WalkForwardTripodBehavior(py_trees.behaviour.Behaviour):
@@ -123,7 +124,6 @@ class CheckForObstacleBehaviour(py_trees.behaviour.Behaviour):
 
     def setup(self, **kwargs):
         rospy.loginfo(f"Setup {self.name}")
-        rospy.Subscriber("/obstacles_detected", Bool, self.check_obstacle)
         return True
 
     def initialise(self):
@@ -135,6 +135,7 @@ class CheckForObstacleBehaviour(py_trees.behaviour.Behaviour):
         self.msg_received = True
 
     def update(self):
+        rospy.Subscriber("/obstacles_detected", Bool, self.check_obstacle)
         if not self.msg_received:
             rospy.loginfo("Waiting for obstacle detection message...")
             return py_trees.common.Status.RUNNING
